@@ -1,0 +1,67 @@
+name: grin
+base: core18
+adopt-info: metadata
+summary: Meet Grin. The private and lightweight mimblewimble blockchain.
+description: |
+  Electronic transactions for all. Without censorship or restrictions.
+  
+  Grin empowers anyone to transact or save modern money without the fear of
+  external control or oppression. Grin is designed for the decades to come, not
+  just tomorrow. Grin wants to be usable by everyone, regardless of borders,
+  culture, skills or access.
+
+grade: stable
+confinement: strict
+
+apps:
+  grin-server:
+    command: grin-server-wrapper.bash
+    daemon: simple
+    plugs: [network, network-bind]
+    environment:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+  grin:
+    command: grin-wrapper.bash
+    plugs: [network, network-bind]
+    environment:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+
+parts:
+  metadata:
+    source: .
+    plugin: nil
+    override-pull: |-
+      snapcraftctl pull
+      snapcraftctl set-version "$(awk '/version =/ {print $3}' Cargo.toml | head -1 | sed 's/\"//g')"
+
+  wrapper:
+    source: snap/local
+    plugin: dump
+
+  grin:
+    source: .
+    plugin: rust
+    build-packages:
+    - build-essential
+    - cmake
+    - git
+    - libgit2-dev
+    - clang
+    - libncurses5-dev
+    - libncursesw5-dev
+    - zlib1g-dev
+    - pkg-config
+    - libssl-dev
+    - llvm
+    stage-packages:
+    - libncursesw5
+    stage:
+    - lib
+    - bin
+    - usr
+    prime:
+    - lib
+    - bin
+    - usr
